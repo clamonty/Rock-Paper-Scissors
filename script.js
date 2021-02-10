@@ -2,66 +2,108 @@ let playerLives = 5;
 let computerLives = 5;
 let round = 1;
 
+const buttons = document.querySelectorAll('.btn');
+buttons.forEach(button => {
+  button.addEventListener('click', (e) => {
+    playRound(e.target.textContent.toLowerCase());
+  });
+})
+
+function displayLives() {
+  const player = document.querySelector('.player-lives');
+  const computer = document.querySelector('.computer-lives');
+  player.textContent = `Player lives: ${playerLives}`;
+  computer.textContent = `Computer lives: ${computerLives}`;
+}
+
+displayLives();
+
 function computerChoice() {
   let selection = ["rock", "paper", "scissors"];
   return selection[Math.floor(Math.random() * selection.length)];
 }
 
-function decideWinner(playerMove, computerMove) {
-  // 1 for player win, 0 for tie, -1 for computer win
-  
-}
-
-function playerChoice() {
-  
-  return playerMove;
-}
-function playRound() {
-  console.log(`Player lives: ${playerLives}`);
-  console.log(`Computer lives: ${computerLives}`)
-  let playerMove;
-  while (true) {
-    playerMove = prompt("Rock, paper, or scissors?").toLowerCase();
-    if (playerMove === "rock" || playerMove === "scissors" || playerMove === "paper") {
-      break;
-    } else {
-      console.log("Invalid input, please try again!");
-      continue;
-    }
-  }
+function playRound(playerMove) {
   let computerMove = computerChoice();
   if (computerMove === 'rock' && playerMove === 'paper' ||
           computerMove === 'paper' && playerMove === 'scissors'||
           computerMove === 'scissors' && playerMove === 'rock') {
-            console.log(`Player's ${playerMove} beats computer's ${computerMove}!`)
-            console.log(`Player wins round ${round}!`);
+            announceRound('Player', 'Computer', playerMove, computerMove);
             computerLives--;
             round++;
+            displayLives();
           }
   else if (computerMove === playerMove) {
-    console.log(`Player's ${playerMove} ties computer's ${computerMove}!`)
+    announceTie(playerMove);
     round++;
   } else {
-    console.log(`Computer's ${computerMove} beats player's ${playerMove}!`)
-    console.log(`Computer wins round ${round}!`);
+    announceRound('Computer', 'Player', computerMove, playerMove);
     playerLives--;
     round++;
+    displayLives();
   }
+  checkForWinner();
 }
 
-function playGame() {
-  console.log(`Round ${round}... Fight!`)
-  while (playerLives > 0 && computerLives > 0) {
-    playRound();
+function announceRound(winner, loser, winnerMove, loserMove) {
+  const announcement = document.createElement('p');
+  announcement.textContent = `${winner}'s ${winnerMove} beats ${loser}'s ${loserMove}! ${winner} wins round ${round}!`;
+  document.querySelector('.game-container').appendChild(announcement);
+}
+
+function announceTie(move) {
+  const announcement = document.createElement('p');
+  announcement.textContent = `Player's and Computer's ${move} both tie! No winner for round ${round}`;
+  document.querySelector('.game-container').appendChild(announcement);
+}
+
+function checkForWinner() {
+  if (playerLives !== 0 && computerLives !== 0) {
+    return;
   }
+  buttons.forEach(button => {
+    button.disabled = true;
+  })
+  const winnerBox = document.createElement('div');
   if (playerLives === 0) {
-    console.log("Computer wins!");
-  } else {
-    console.log("Player wins!");
+    winnerBox.textContent = 'Player\'s lives have reached 0! Computer wins!';
+  } else if (computerLives === 0) {
+    winnerBox.textContent = 'Computer\'s lives have reached 0! Player wins!';
+  }
+  winnerBox.classList.add('winner-box');
+  document.querySelector('.game-container').appendChild(winnerBox);
+
+  const replayButton = document.createElement('button');
+  replayButton.textContent = 'Play Again?'
+  replayButton.addEventListener('click', () => {
+    restartGame();
+  });
+  document.querySelector('.game-container').appendChild(replayButton);
+}
+
+function restartGame() {
+  // Reset game
+  playerLives = 5;
+  computerLives = 5;
+  round = 1;
+  displayLives();
+  // Remove child nodes from game container
+  removeChildNodes(document.querySelector('.game-container'));
+  buttons.forEach(button => {
+    button.disabled = false;
+  });
+  
+}
+
+// Remove all child nodes of the parent
+function removeChildNodes(parent) {
+  while (parent.firstChild) {
+    parent.removeChild(parent.firstChild);
   }
 }
 
-playGame();
+
+
 
 
 
